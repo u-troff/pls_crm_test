@@ -1,0 +1,78 @@
+// Prisma schema for the CRM demo app.
+// SQLite has no native enum support, so enum-like fields are plain Strings;
+// the allowed values are defined as TS literal unions in lib/constants.ts.
+// Learn more: https://pris.ly/d/prisma-schema
+
+generator client {
+  provider = "prisma-client-js"
+}
+
+datasource db {
+  provider = "sqlite"
+  url      = env("DATABASE_URL")
+}
+
+model BusinessConfig {
+  id           String  @id @default(cuid())
+  businessName String  @default("Your Business")
+  primaryColor String  @default("#2563eb")
+  logoUrl      String?
+  bookingLink  String?
+  supportEmail String?
+}
+
+model Client {
+  id        String   @id @default(cuid())
+  name      String
+  company   String?
+  phone     String?
+  email     String?
+  status    String   @default("NEW_LEAD")
+  dealValue Float    @default(0)
+  notes     String?
+  source    String?
+  createdAt DateTime @default(now())
+  updatedAt DateTime @updatedAt
+
+  pipelineStages PipelineStage[]
+  calendarEvents CalendarEvent[]
+  coldCalls      ColdCall[]
+}
+
+model PipelineStage {
+  id        String   @id @default(cuid())
+  clientId  String
+  client    Client   @relation(fields: [clientId], references: [id], onDelete: Cascade)
+  stage     String
+  updatedAt DateTime @default(now())
+}
+
+model CalendarEvent {
+  id       String   @id @default(cuid())
+  title    String
+  type     String   @default("OTHER")
+  date     DateTime
+  clientId String?
+  client   Client?  @relation(fields: [clientId], references: [id], onDelete: SetNull)
+  notes    String?
+}
+
+model Transaction {
+  id          String   @id @default(cuid())
+  date        DateTime
+  description String
+  category    String
+  amount      Float
+  type        String
+}
+
+model ColdCall {
+  id           String    @id @default(cuid())
+  clientId     String?
+  client       Client?   @relation(fields: [clientId], references: [id], onDelete: SetNull)
+  prospectName String
+  date         DateTime  @default(now())
+  outcome      String
+  notes        String?
+  followUpDate DateTime?
+}
