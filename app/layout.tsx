@@ -33,7 +33,7 @@ export default async function RootLayout({
   children: React.ReactNode;
 }>) {
   const config = await getBusinessConfig();
-
+  console.log("start")
   return (
     <html lang="en" suppressHydrationWarning>
       <body
